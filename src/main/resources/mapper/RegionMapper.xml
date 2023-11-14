@@ -6,7 +6,17 @@
             VALUES (#{regionId}, #{regionName}, #{regionType}, #{regionParentId}, #{regionLevel})
     </insert>
 
-    <select id="selectRegion">
 
+    <select id="getRegion" resultType="com.example.regiondemo.domain.Region">
+        select region_id, region_name, region_type, region_parent_id, region_level from sys_region
+        <where>
+            1=1
+            <if test='pCode != null and pCode != ""' >
+                and region_parent_id = #{pCode}
+            </if>
+            <if test='type != null and type != ""' >
+                and region_type = #{type}
+            </if>
+        </where>
     </select>
 </mapper>
