@@ -4,11 +4,11 @@ import com.alibaba.excel.annotation.ExcelProperty;
 
 public class ExcelData {
 
-    @ExcelProperty("县")
+    @ExcelProperty("县区名称")
     private String county;
-    @ExcelProperty("乡镇")
+    @ExcelProperty("乡镇名称")
     private String township;
-    @ExcelProperty("村")
+    @ExcelProperty("村居名称")
     private String village;
 
     public String getCounty() {

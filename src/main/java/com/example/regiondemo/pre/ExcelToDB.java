@@ -2,25 +2,15 @@ package com.example.regiondemo.pre;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.read.listener.PageReadListener;
-import com.alibaba.excel.util.FileUtils;
 import com.alibaba.excel.util.StringUtils;
 import com.example.regiondemo.domain.ExcelData;
 import com.example.regiondemo.domain.Region;
 import com.example.regiondemo.mapper.RegionMapper;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
@@ -44,29 +34,47 @@ public class ExcelToDB {
 
     public static void main(String[] args) {
         String  fileName = "src/main/resources/demo.xlsx";
-        Map<String,Map<String, Region>> countryTownMap = new HashMap<>();
         Map<String, String> nameCodeMap = new HashMap<>();
-        Set<Region> regions = new HashSet<>();
+        Map<String, Region> regionIdRegion = new HashMap<>();
         AtomicInteger i = new AtomicInteger(1);
         EasyExcel.read(fileName, ExcelData.class, new PageReadListener<ExcelData>(dataList -> {
             for (ExcelData demoData : dataList) {
-                String country = demoData.getCounty();
-                String town = demoData.getTownship();
-                String village = demoData.getVillage();
-
-                String countryCode = nameCodeMap.getOrDefault(country, i.getAndIncrement()+ "");
-                String townCode = nameCodeMap.getOrDefault(town, i.getAndIncrement()+ "");
-                String villageCode = nameCodeMap.getOrDefault(village, i.getAndIncrement()+ "");
-                Region temp = new Region();
-                temp.setRegionLevel(2);
-                temp.setRegionId(villageCode);
-                temp.setRegionName(townCode);
-                temp.setRegionType("0");
-                temp.setRegionParentId(townCode);
-
-
+                setRegions("1", nameCodeMap, regionIdRegion, i, demoData);
             }
-        })).sheet().doRead();
+        })).sheet("劝导站统计").doRead();
+        EasyExcel.read(fileName, ExcelData.class, new PageReadListener<ExcelData>(dataList -> {
+            for (ExcelData demoData : dataList) {
+                setRegions("0", nameCodeMap, regionIdRegion, i, demoData);
+            }
+        })).sheet("村居统计").doRead();
+
+        StringBuffer sql = new StringBuffer();
+        regionIdRegion.forEach((id,region)->{
+            String insertSql = String.format("INSERT INTO sys_region (region_id, region_name, region_type, region_parent_id, region_level)" +
+                    " VALUES ('%s','%s', '%s', '%s', %d);", region.getRegionId(), region.getRegionName(), region.getRegionType(), region.getRegionParentId(), region.getRegionLevel());
+            sql.append(insertSql).append("\n");
+        });
+        log.info("sql: {}", sql);
+
+    }
+
+    private static void setRegions(String regionType, Map<String, String> nameCodeMap, Map<String, Region> regionIdRegion, AtomicInteger i, ExcelData demoData) {
+        String country = demoData.getCounty();
+        String town = demoData.getTownship();
+        String village = demoData.getVillage();
+
+        String countryCode = nameCodeMap.getOrDefault(country, "230000"+ i.getAndIncrement());
+
+        String townCode = nameCodeMap.getOrDefault(town, "230001" + i.getAndIncrement());
+        String villageCode = nameCodeMap.getOrDefault(village, "230002" + i.getAndIncrement());
+        nameCodeMap.putIfAbsent(country, countryCode);
+        nameCodeMap.putIfAbsent(town, townCode);
+        nameCodeMap.putIfAbsent(village, villageCode);
+
+        Region villageRegion = new Region(villageCode, village, regionType, townCode, 2);
+        regionIdRegion.putIfAbsent(villageCode, villageRegion);
+        regionIdRegion.putIfAbsent(townCode, new Region(townCode, town, "0", countryCode, 1));
+        regionIdRegion.putIfAbsent(country, new Region(countryCode, country, "0", "0", 0));
     }
 
 }

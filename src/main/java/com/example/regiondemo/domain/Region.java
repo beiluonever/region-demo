@@ -7,6 +7,17 @@ public class Region {
     private String regionParentId;
     private Integer regionLevel;
 
+    public Region(String regionId, String regionName, String regionType, String regionParentId, Integer regionLevel) {
+        this.regionId = regionId;
+        this.regionName = regionName;
+        this.regionType = regionType;
+        this.regionParentId = regionParentId;
+        this.regionLevel = regionLevel;
+    }
+
+    public Region() {
+    }
+
     public String getRegionId() {
         return regionId;
     }
