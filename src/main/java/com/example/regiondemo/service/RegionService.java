@@ -20,9 +20,11 @@ public class RegionService {
     RegionMapper regionMapper;
 
     public List<RegionTreeVO> getRegionTree(String pCode, String type) {
-        List<Region> regionList = regionMapper.getRegion(pCode, type);
+        List<Region> regionList = regionMapper.getRegion(pCode, null);
         List<RegionTreeVO> result = new ArrayList<>();
-        if(CollectionUtils.isEmpty(regionList)){
+        List<RegionTreeVO> townResult = new ArrayList<>();
+        List<RegionTreeVO> vaillgeResult = new ArrayList<>();
+        if (CollectionUtils.isEmpty(regionList)) {
             return result;
         }
 
@@ -38,23 +40,37 @@ public class RegionService {
 
                 if (!CollectionUtils.isEmpty(children)) {
                     List<RegionTreeVO> treeChild = new ArrayList<>();
-                    children.forEach(c -> treeChild.add(new RegionTreeVO(c.getRegionName(), c.getRegionId(),
-                            c.getRegionLevel(), c.getRegionParentId(), c.getRegionType())));
+                    children.forEach(c ->{
+                                if (c.getRegionType().equals(type)) {
+                                    treeChild.add(new RegionTreeVO(c.getRegionName(), c.getRegionId(),
+                                            c.getRegionLevel(), c.getRegionParentId(), c.getRegionType()));
+                                }
+                            }
+                    );
                     self.setChildren(treeChild);
                 }
-
-                List<RegionTreeVO> townList = townPCodeMap.getOrDefault(region.getRegionParentId(),new ArrayList<>());
+                townResult.add(self);
+                List<RegionTreeVO> townList = townPCodeMap.getOrDefault(region.getRegionParentId(), new ArrayList<>());
                 townList.add(self);
                 townPCodeMap.put(region.getRegionParentId(), townList);
-            }else if(region.getRegionLevel() == 0){
+            } else if (region.getRegionLevel() == 0) {
                 topLevel.add(self);
+            } else if (region.getRegionLevel() == 2) {
+                if (self.getType().equals(type)) {
+                    vaillgeResult.add(self);
+                }
             }
         });
         topLevel.forEach(self -> {
             self.setChildren(townPCodeMap.get(self.getCode()));
             result.add(self);
         });
-
-        return result;
+        if (!CollectionUtils.isEmpty(result)) {
+            return result;
+        }
+        if (!CollectionUtils.isEmpty(townResult)) {
+            return townResult;
+        }
+        return vaillgeResult;
     }
 }
