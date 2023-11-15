@@ -3,6 +3,8 @@ package com.example.regiondemo.service;
 import com.example.regiondemo.domain.Region;
 import com.example.regiondemo.domain.RegionTreeVO;
 import com.example.regiondemo.mapper.RegionMapper;
+import com.mysql.cj.util.StringUtils;
+import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -20,6 +22,10 @@ public class RegionService {
     RegionMapper regionMapper;
 
     public List<RegionTreeVO> getRegionTree(String pCode, String type) {
+        if(StringUtils.isNullOrEmpty(type)){
+            //默认选区县
+            type = "0";
+        }
         List<Region> regionList = regionMapper.getRegion(pCode, null);
         List<RegionTreeVO> result = new ArrayList<>();
         List<RegionTreeVO> townResult = new ArrayList<>();
@@ -31,6 +37,8 @@ public class RegionService {
         Map<String, List<Region>> pCodeMap = regionList.stream().collect(Collectors.groupingBy(Region::getRegionParentId));
         Map<String, List<RegionTreeVO>> townPCodeMap = new HashMap<>();
         List<RegionTreeVO> topLevel = new ArrayList<>();
+        String finalType = type;
+        String finalType1 = type;
         regionList.forEach(region -> {
             String code = region.getRegionId();
             RegionTreeVO self = new RegionTreeVO(region.getRegionName(), region.getRegionId(),
@@ -41,7 +49,7 @@ public class RegionService {
                 if (!CollectionUtils.isEmpty(children)) {
                     List<RegionTreeVO> treeChild = new ArrayList<>();
                     children.forEach(c ->{
-                                if (c.getRegionType().equals(type)) {
+                                if (c.getRegionType().equals(finalType)) {
                                     treeChild.add(new RegionTreeVO(c.getRegionName(), c.getRegionId(),
                                             c.getRegionLevel(), c.getRegionParentId(), c.getRegionType()));
                                 }
@@ -56,7 +64,7 @@ public class RegionService {
             } else if (region.getRegionLevel() == 0) {
                 topLevel.add(self);
             } else if (region.getRegionLevel() == 2) {
-                if (self.getType().equals(type)) {
+                if (self.getType().equals(finalType1)) {
                     vaillgeResult.add(self);
                 }
             }

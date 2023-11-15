@@ -63,10 +63,10 @@ public class ExcelToDB {
         String town = demoData.getTownship();
         String village = demoData.getVillage();
 
-        String countryCode = nameCodeMap.getOrDefault(country, "230000"+ i.getAndIncrement());
+        String countryCode = nameCodeMap.getOrDefault(country, ""+ i.getAndIncrement());
 
-        String townCode = nameCodeMap.getOrDefault(town, "230001" + i.getAndIncrement());
-        String villageCode = nameCodeMap.getOrDefault(village, "230002" + i.getAndIncrement());
+        String townCode = nameCodeMap.getOrDefault(town, "" + i.getAndIncrement());
+        String villageCode = nameCodeMap.getOrDefault(village, "" + i.getAndIncrement());
         nameCodeMap.putIfAbsent(country, countryCode);
         nameCodeMap.putIfAbsent(town, townCode);
         nameCodeMap.putIfAbsent(village, villageCode);
