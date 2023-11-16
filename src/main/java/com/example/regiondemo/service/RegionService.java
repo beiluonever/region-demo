@@ -48,7 +48,7 @@ public class RegionService {
                 if (!CollectionUtils.isEmpty(children)) {
                     List<RegionTreeVO> treeChild = new ArrayList<>();
                     children.forEach(c ->{
-                                if (c.getRegionType().equals(finalType)) {
+                                if (c.getRegionType().equals(finalType)  || hasHefei ) {
                                     treeChild.add(new RegionTreeVO(c.getRegionName(), c.getRegionId(),
                                             hasHefei ? c.getRegionLevel() +1 : c.getRegionLevel() , c.getRegionParentId(), c.getRegionType()));
                                 }
@@ -63,7 +63,7 @@ public class RegionService {
             } else if (region.getRegionLevel() == 0) {
                 topLevel.add(self);
             } else if (region.getRegionLevel() == 2) {
-                if (self.getType().equals(finalType1)) {
+                if (self.getType().equals(finalType1) || hasHefei) {
                     vaillgeResult.add(self);
                 }
             }
