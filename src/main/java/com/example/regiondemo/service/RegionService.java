@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +23,8 @@ public class RegionService {
             //默认选区县
             type = "0";
         }
+        boolean hasHefei = "2".equals(type);
+
         List<Region> regionList = regionMapper.getRegion(pCode, null);
         List<RegionTreeVO> result = new ArrayList<>();
         List<RegionTreeVO> townResult = new ArrayList<>();
@@ -42,7 +41,7 @@ public class RegionService {
         regionList.forEach(region -> {
             String code = region.getRegionId();
             RegionTreeVO self = new RegionTreeVO(region.getRegionName(), region.getRegionId(),
-                    region.getRegionLevel(), region.getRegionParentId(), region.getRegionType());
+                    hasHefei ? region.getRegionLevel() +1 : region.getRegionLevel(), region.getRegionParentId(), region.getRegionType());
             if (region.getRegionLevel() == 1) {
                 List<Region> children = pCodeMap.get(code);
 
@@ -51,7 +50,7 @@ public class RegionService {
                     children.forEach(c ->{
                                 if (c.getRegionType().equals(finalType)) {
                                     treeChild.add(new RegionTreeVO(c.getRegionName(), c.getRegionId(),
-                                            c.getRegionLevel(), c.getRegionParentId(), c.getRegionType()));
+                                            hasHefei ? c.getRegionLevel() +1 : c.getRegionLevel() , c.getRegionParentId(), c.getRegionType()));
                                 }
                             }
                     );
@@ -74,6 +73,12 @@ public class RegionService {
             result.add(self);
         });
         if (!CollectionUtils.isEmpty(result)) {
+            if(hasHefei){
+                RegionTreeVO regionTop = new RegionTreeVO("合肥市", "0",
+                        0, "-1", "0");
+                regionTop.setChildren(result);
+                return Collections.singletonList(regionTop);
+            }
             return result;
         }
         if (!CollectionUtils.isEmpty(townResult)) {
