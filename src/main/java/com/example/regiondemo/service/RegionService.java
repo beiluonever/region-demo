@@ -20,8 +20,8 @@ public class RegionService {
 
     public List<RegionTreeVO> getRegionTree(String pCode, String type) {
         if(StringUtils.isNullOrEmpty(type)){
-            //默认选区县
-            type = "0";
+            //默认选区县村
+            type = "2";
         }
         boolean hasHefei = "2".equals(type);
 
@@ -41,14 +41,14 @@ public class RegionService {
         regionList.forEach(region -> {
             String code = region.getRegionId();
             RegionTreeVO self = new RegionTreeVO(region.getRegionName(), region.getRegionId(),
-                    hasHefei ? region.getRegionLevel() +1 : region.getRegionLevel(), region.getRegionParentId(), region.getRegionType());
+                    hasHefei ? region.getRegionLevel() + 1 : region.getRegionLevel(), region.getRegionParentId(), region.getRegionType());
             if (region.getRegionLevel() == 1) {
                 List<Region> children = pCodeMap.get(code);
 
                 if (!CollectionUtils.isEmpty(children)) {
                     List<RegionTreeVO> treeChild = new ArrayList<>();
                     children.forEach(c ->{
-                                if (c.getRegionType().equals(finalType)  || hasHefei ) {
+                                if (c.getRegionType().equals(finalType)) {
                                     treeChild.add(new RegionTreeVO(c.getRegionName(), c.getRegionId(),
                                             hasHefei ? c.getRegionLevel() +1 : c.getRegionLevel() , c.getRegionParentId(), c.getRegionType()));
                                 }
@@ -63,7 +63,7 @@ public class RegionService {
             } else if (region.getRegionLevel() == 0) {
                 topLevel.add(self);
             } else if (region.getRegionLevel() == 2) {
-                if (self.getType().equals(finalType1) || hasHefei) {
+                if (self.getType().equals(finalType1)) {
                     vaillgeResult.add(self);
                 }
             }

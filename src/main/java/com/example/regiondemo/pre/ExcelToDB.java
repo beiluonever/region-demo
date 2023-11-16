@@ -45,7 +45,7 @@ public class ExcelToDB {
         })).sheet("劝导站统计").doRead();
         EasyExcel.read(fileName, ExcelData.class, new PageReadListener<ExcelData>(dataList -> {
             for (ExcelData demoData : dataList) {
-                setRegions("0", nameCodeMap, regionIdRegion, i, demoData);
+                setRegions("2", nameCodeMap, regionIdRegion, i, demoData);
             }
         })).sheet("村居统计").doRead();
 
