@@ -60,7 +60,7 @@ public class ExcelToDB {
 
                 String counselorId = i.getAndIncrement() + "";
                 counselorMap.put(counselorId, new Counselor(counselorId, nameCodeMap.get(country), nameCodeMap.get(town),
-                        nameCodeMap.get(village), demoData.getPhoneNum(), demoData.getName(), demoData.getSex()
+                        nameCodeMap.get(town+"_"+village), demoData.getPhoneNum(), demoData.getName(), demoData.getSex()
                         , demoData.getTitle(), demoData.getJoinDate()));
 
             }
@@ -93,13 +93,22 @@ public class ExcelToDB {
         String town = demoData.getTownship();
         String village = demoData.getVillage();
 
-        String countryCode = nameCodeMap.getOrDefault(country, "" + i.getAndIncrement());
+        String countryCode = nameCodeMap.get(country);
+        if(countryCode == null){
+            countryCode = "" + i.getAndIncrement();
+        }
+        String townCode = nameCodeMap.get(town);
+        if(townCode == null){
+            townCode = "" + i.getAndIncrement();
+        }
+        String villageCode = nameCodeMap.get(town+"_"+village);
+        if(villageCode == null){
+            villageCode = "" + i.getAndIncrement();
+        }
 
-        String townCode = nameCodeMap.getOrDefault(town, "" + i.getAndIncrement());
-        String villageCode = nameCodeMap.getOrDefault(village, "" + i.getAndIncrement());
         nameCodeMap.putIfAbsent(country, countryCode);
         nameCodeMap.putIfAbsent(town, townCode);
-        nameCodeMap.putIfAbsent(village, villageCode);
+        nameCodeMap.putIfAbsent(town+"_"+village, villageCode);
 
         Region villageRegion = new Region(villageCode, village, regionType, townCode, 2);
         regionIdRegion.putIfAbsent(villageCode, villageRegion);
