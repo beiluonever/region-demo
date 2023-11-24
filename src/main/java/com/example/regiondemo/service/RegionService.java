@@ -4,13 +4,11 @@ import com.example.regiondemo.domain.Region;
 import com.example.regiondemo.domain.RegionTreeVO;
 import com.example.regiondemo.mapper.RegionMapper;
 import com.mysql.cj.util.StringUtils;
-import org.apache.poi.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.util.CollectionUtils;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class RegionService {
@@ -19,12 +17,17 @@ public class RegionService {
     RegionMapper regionMapper;
 
     public List<RegionTreeVO> getRegionTree(String pCode, String type) {
-
+        if(StringUtils.isNullOrEmpty(type)){
+            type = "2";
+        }
         List<Region> regionList = regionMapper.getRegion(pCode, null);
         List<RegionTreeVO> result = new ArrayList<>();
+        String finalType = type;
         regionList.forEach(region->{
-            result.add(new RegionTreeVO(region.getRegionName(), region.getRegionId(),
-                   region.getRegionLevel(), region.getRegionParentId(), region.getRegionType()));
+            if("0".equals(region.getRegionType()) || region.getRegionType().equals(finalType)) {
+                result.add(new RegionTreeVO(region.getRegionName(), region.getRegionId(),
+                        region.getRegionLevel(), region.getRegionParentId(), region.getRegionType()));
+            }
         });
         return buildTree(result);
     }
